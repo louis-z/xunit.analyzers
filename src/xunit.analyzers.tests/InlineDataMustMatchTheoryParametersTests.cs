@@ -877,21 +877,35 @@ public class TestClass
 			}
 		}
 
-		public class ForConversionFromNullToNonAnnotatedReference : InlineDataMustMatchTheoryParametersTests
+		public class ForConversionFromNullToReferenceType : InlineDataMustMatchTheoryParametersTests
 		{
 			[Fact]
-			public async void FindsWarning_IfNullableEnable()
+			public async void FindsWarning_IfNullableEnableAndParameterTypeNotNullable()
 			{
 				var source = @"
 #nullable enable
 public class TestClass
 {
-	[Xunit.Theory, Xunit.InlineData(null)]
-	public void TestMethod(string a) { }
+	[Xunit.Theory, Xunit.InlineData(1, null)]
+	public void TestMethod(int a, string b) { }
 }";
 
-				var expected = Verify.Diagnostic("xUnit1027").WithSpan(5, 34, 5, 38).WithSeverity(DiagnosticSeverity.Warning).WithArguments("a", "string");
+				var expected = Verify.Diagnostic("xUnit1027").WithSpan(5, 37, 5, 41).WithSeverity(DiagnosticSeverity.Warning).WithArguments("b", "string");
 				await Verify.VerifyAnalyzerAsync(source, expected);
+			}
+
+			[Fact]
+			public async void DoesNotFindWarning_IfNullableEnableAndParameterTypeNullable()
+			{
+				var source = @"
+#nullable enable
+public class TestClass
+{
+	[Xunit.Theory, Xunit.InlineData(1, null)]
+	public void TestMethod(int a, string? b) { }
+}";
+
+				await Verify.VerifyAnalyzerAsync(source);
 			}
 
 			[Fact]
@@ -901,8 +915,8 @@ public class TestClass
 #nullable disable
 public class TestClass
 {
-	[Xunit.Theory, Xunit.InlineData(null)]
-	public void TestMethod(string a) { }
+	[Xunit.Theory, Xunit.InlineData(1, null)]
+	public void TestMethod(int a, string b) { }
 }";
 
 				await Verify.VerifyAnalyzerAsync(source);
