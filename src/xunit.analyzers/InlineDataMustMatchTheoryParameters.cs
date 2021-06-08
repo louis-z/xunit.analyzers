@@ -31,7 +31,8 @@ namespace Xunit.Analyzers
 				Descriptors.X1009_InlineDataMustMatchTheoryParameters_TooFewValues,
 				Descriptors.X1010_InlineDataMustMatchTheoryParameters_IncompatibleValueType,
 				Descriptors.X1011_InlineDataMustMatchTheoryParameters_ExtraValue,
-				Descriptors.X1012_InlineDataMustMatchTheoryParameters_NullShouldNotBeUsedForIncompatibleParameter);
+				Descriptors.X1012_InlineDataMustMatchTheoryParameters_NullShouldNotBeUsedForIncompatibleParameter,
+				Descriptors.X1027_InlineDataMustMatchTheoryParameters_IncompatibleNullability);
 
 		internal override void AnalyzeCompilation(CompilationStartAnalysisContext context, XunitContext xunitContext)
 		{
@@ -135,6 +136,18 @@ namespace Xunit.Analyzers
 						{
 							context.ReportDiagnostic(Diagnostic.Create(
 								Descriptors.X1012_InlineDataMustMatchTheoryParameters_NullShouldNotBeUsedForIncompatibleParameter,
+								dataParameterExpressions[valueIdx].GetLocation(),
+								properties,
+								parameter.Name,
+								SymbolDisplay.ToDisplayString(parameterType)));
+						}
+
+						if (value.IsNull
+							&& parameterType.IsReferenceType
+							&& parameter.NullableAnnotation == NullableAnnotation.NotAnnotated)
+						{
+							context.ReportDiagnostic(Diagnostic.Create(
+								Descriptors.X1027_InlineDataMustMatchTheoryParameters_IncompatibleNullability,
 								dataParameterExpressions[valueIdx].GetLocation(),
 								properties,
 								parameter.Name,

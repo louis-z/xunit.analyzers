@@ -877,6 +877,38 @@ public class TestClass
 			}
 		}
 
+		public class ForConversionFromNullToNonAnnotatedReference : InlineDataMustMatchTheoryParametersTests
+		{
+			[Fact]
+			public async void FindsWarning_IfNullableEnable()
+			{
+				var source = @"
+#nullable enable
+public class TestClass
+{
+	[Xunit.Theory, Xunit.InlineData(null)]
+	public void TestMethod(string a) { }
+}";
+
+				var expected = Verify.Diagnostic("xUnit1027").WithSpan(5, 34, 5, 38).WithSeverity(DiagnosticSeverity.Warning).WithArguments("a", "string");
+				await Verify.VerifyAnalyzerAsync(source, expected);
+			}
+
+			[Fact]
+			public async void DoesNotFindWarning_IfNullableDisable()
+			{
+				var source = @"
+#nullable disable
+public class TestClass
+{
+	[Xunit.Theory, Xunit.InlineData(null)]
+	public void TestMethod(string a) { }
+}";
+
+				await Verify.VerifyAnalyzerAsync(source);
+			}
+		}
+
 		// Note: decimal literal 42M is not valid as an attribute argument
 		public static IEnumerable<Tuple<string>> IntegerValues { get; }
 			= new[] { "42", "42L", "42u", "42ul", "(short)42", "(byte)42", "(ushort)42", "(sbyte)42", }.Select(v => Tuple.Create(v)).ToArray();
