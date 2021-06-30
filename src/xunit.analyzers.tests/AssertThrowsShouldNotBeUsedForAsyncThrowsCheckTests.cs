@@ -288,8 +288,7 @@ void TestMethod() {
     Xunit.Assert.Throws(typeof(System.NotImplementedException), ThrowingMethod);
 } }";
 
-			var expected = Verify.CompilerError("CS0121").WithSpan(7, 18, 7, 24).WithMessage("The call is ambiguous between the following methods or properties: 'Assert.Throws(Type, Action)' and 'Assert.Throws(Type, Func<object>)'");
-			await Verify.VerifyAnalyzerAsync(source, expected);
+			await Verify.VerifyAnalyzerAsync(source);
 		}
 
 		[Fact]
